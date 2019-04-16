@@ -26,16 +26,44 @@ int main(int argc, char *argv[]){
 //				--- lee las filas y las columnas del tablero
 //				--- mientras la opción leída no sea 3, juega al hundir la flota 
 	
+	int seleccion = menu();	
 
-	return 0;
+	if(seleccion = 3){
+		return 0;
+	}
 }
 
-int menu(){
+int menu1(){
 //Función menu.
 //	- INPUTS: nada
 //	- OUTPUTS: la opción leída (1, 2 ó 3)
 //  - Presenta el menú por pantalla y lee una opción. Si no es 1, 2 ó 3 da un mensaje de error y vuelve a leerla hasta que sea correcta.
-	
+	int select;
+	do{
+		//Imprime el menu inicial
+		printf("\e[1;1H\e[2J");
+		printf("\n");
+		printf("\t#============================================#\n");
+		printf("\t#   [1] Jugar (ordenador vs jugador)         #\n");
+		printf("\t#   [2] Jugar (ordenador vs ordenador)       #\n");
+		printf("\t#   [3] Salir                                #\n");
+		printf("\t#============================================#\n");
+		printf("\n");
+
+
+		//Lee opcion
+		scanf("%d",&select);
+
+		//Comprueba opcion
+		if (select > 0 && select <= 3){
+			return select;
+		}	
+		
+		else{
+			printf("\nLa opción introducida no es válida\n");
+		}
+	}
+	while(select < 0 || select > 3);
 }
 
 void hundirLaFlota(int opcion, int f,  int c){
