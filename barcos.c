@@ -6,7 +6,6 @@
 #define NUMBARCOS3 1
 void limpiarPantalla();
 int menu();
-int menuJuego();
 void hundirLaFlota(int opcion, int f,  int c);
 void colocarBarcosManualmente(int *t, int f, int c);
 void colocarBarcosAutomaticamente(int *t, int f, int c);
@@ -29,14 +28,17 @@ int main(int argc, char *argv[]){
 	
 	limpiarPantalla();
 	if (argc<3){
-		printf("No ha introducido correctamente el numero de filas y columans del tablero.\n");
+		printf("No ha introducido correctamente el numero de filas y columnas del tablero.\n");
 		return -1;
 	}
 
 	int filas = atoi(argv[1]);
 	int columnas = atoi(argv[2]);
-	int *tablero;
-	tablero = (int*)malloc(sizeof(int)*filas*columnas);
+	int *barcosJ1, *barcosJ2, *disparoJ1, *disparoJ2;
+	inicializarTablero(barcosJ1,filas,columnas);
+	inicializarTablero(barcosJ2,filas,columnas);
+	inicializarTablero(disparoJ1,filas,columnas);
+	inicializarTablero(disparoJ2,filas,columnas);
 	
 	int seleccion = menu();
 
@@ -49,10 +51,12 @@ int main(int argc, char *argv[]){
 			return 0;
 			break;
 		case 4:
-			colocarBarcosAutomaticamente(tablero, filas, columnas);
+			limpiarPantalla();
+			colocarBarcosAutomaticamente(barcosJ1, filas, columnas);
 			break;
 		case 5:
-			colocarBarcosManualmente(tablero, filas, columnas);
+			limpiarPantalla();
+			colocarBarcosManualmente(barcosJ2, filas, columnas);
 			break;
 		case 6:
 			limpiarPantalla();
@@ -106,39 +110,12 @@ int menu(){
 		}	
 		
 		else{
-			menu();
 			printf("\nLa opción introducida no es válida\n");
+			menu();
 		//Menu de juego
 
 	}
 	
-}
-
-int menuJuego(){
-	int select;
-	while(select < 0 || select > 3){
-		//Imprime el menu inicial
-		printf("\e[1;1H\e[2J");
-		printf("\n");
-		printf("\t#============================================#\n");
-		printf("\t#   [1] Colocar barcos automáticamente       #\n");
-		printf("\t#   [2] Colocar barcos manualmente           #\n");
-		printf("\t#   [3] Volver                               #\n");
-		printf("\t#============================================#\n");
-		printf("\n");
-
-		//Lee opcion
-		scanf("%d",&select);
-
-		//Comprueba opcion
-		if (select > 0 && select <= 3){
-			return select;
-		}	
-		
-		else{
-			printf("\nLa opción introducida no es válida\n");
-		}
-	}
 }
 
 void hundirLaFlota(int opcion, int f,  int c){
@@ -186,6 +163,21 @@ void inicializarTablero(int *t, int f, int c){
 //	- columnas
 //OUTPUS: nada
 //Inicializa a 0 la tabla
+	
+	t = (int *)malloc(f*c*sizeof(int));
+	int i,j;
+	
+	for (i = 0; i < f*c; i++){
+		*(t+i)=0;
+	}
+	
+	for (int j = 0; j < c; j++){
+		for (int i = 0; i < f; i++){
+			printf("%d\t",*(t+i*c+j)); 
+		}
+	printf("\n");
+	}
+	
 	
 	return;
 }
@@ -237,7 +229,6 @@ int comprobacionEspacioParaBarco(int *t, int f, int c, int iniFila, int iniCol, 
 //	- orientación (0 horizontal, 1 vertical)
 //OUTPUTS: 1 si cabe, 0 si no cabe
 //Comprueba si cabe un barco a partir de la posición indicada en la orientación indicada. Devuelve 0 si no cabe, 1 si sí.
-	
 }
 
 void colocarBarcosAutomaticamente(int *t, int f, int c){
