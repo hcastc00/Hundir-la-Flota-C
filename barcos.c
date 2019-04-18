@@ -34,7 +34,13 @@ int main(int argc, char *argv[]){
 
 	int filas = atoi(argv[1]);
 	int columnas = atoi(argv[2]);
+	
 	int *barcosJ1, *barcosJ2, *disparoJ1, *disparoJ2;
+	barcosJ1 = (int *)malloc(filas*columnas*sizeof(int));
+	barcosJ2 = (int *)malloc(filas*columnas*sizeof(int));
+	disparoJ1 = (int *)malloc(filas*columnas*sizeof(int));
+	disparoJ2 = (int *)malloc(filas*columnas*sizeof(int));
+
 	inicializarTablero(barcosJ1,filas,columnas);
 	inicializarTablero(barcosJ2,filas,columnas);
 	inicializarTablero(disparoJ1,filas,columnas);
@@ -163,22 +169,10 @@ void inicializarTablero(int *t, int f, int c){
 //	- columnas
 //OUTPUS: nada
 //Inicializa a 0 la tabla
-	
-	t = (int *)malloc(f*c*sizeof(int));
 	int i,j;
-	
 	for (i = 0; i < f*c; i++){
 		*(t+i)=0;
 	}
-	
-	for (int j = 0; j < c; j++){
-		for (int i = 0; i < f; i++){
-			printf("%d\t",*(t+i*c+j)); 
-		}
-	printf("\n");
-	}
-	
-	
 	return;
 }
 
@@ -229,6 +223,39 @@ int comprobacionEspacioParaBarco(int *t, int f, int c, int iniFila, int iniCol, 
 //	- orientación (0 horizontal, 1 vertical)
 //OUTPUTS: 1 si cabe, 0 si no cabe
 //Comprueba si cabe un barco a partir de la posición indicada en la orientación indicada. Devuelve 0 si no cabe, 1 si sí.
+	int i,hueco=0;
+
+	//HORIZONTAL
+	if (orientacion == 0){
+
+		for (i = 0; i < tamBarco; i++){
+			if (*(t+(iniFila*c)+iniCol+i)==0){
+				hueco++;
+			}
+			printf("%d\n",hueco);
+		}
+	}
+
+	//VERTICAL
+	else if (orientacion==1){
+		for (i = 0; i < tamBarco; i++){
+			if (*(t+(iniFila+i)*c+iniCol)==0){
+				hueco++;
+			}
+		}
+	}
+	
+	else{
+		printf("ORIENTACION INVALIDA\n");
+		return -1;
+	}
+	
+	if(hueco==tamBarco){
+		return 1;
+	}
+	else{
+		return 0;
+		}
 }
 
 void colocarBarcosAutomaticamente(int *t, int f, int c){
