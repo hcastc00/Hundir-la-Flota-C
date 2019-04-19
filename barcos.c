@@ -13,7 +13,7 @@ void inicializarTablero(int *t, int f, int c);
 void imprimirTablero(int *t, int f, int c);
 void imprimirTableroArchivo(int *t, int f, int c, FILE *pa);
 int comprobacionEspacioParaBarco(int *t, int f, int c, int iniFila, int iniCol, int tamBarco, int orientacion);
-int compruebaGanador (int *b, int f, int c);
+int compruebaGanador (int *t, int f, int c);
 int compruebaDisparo(int *t, int f, int c, int posFila, int posCol);
 void juegoManual(int f, int c);
 void juegoAutomatico(int f, int c);
@@ -111,13 +111,13 @@ void hundirLaFlota(int opcion, int f,  int c){
 //  - Según la opción leída llama a jugar manual (opción 1), jugar automático (opción 2) o muestra un mensaje de fin (opción 3)
 	switch(opcion){
 		case 2:
-			printf("Pc VS PC\n");
+			limpiarPantalla();
+			juegoAutomatico(f,c);
 			break;
 		case 3:
 			salir();
 		case 4:
 			limpiarPantalla();
-			juegoAutomatico(f,c);
 			break;
 		case 5:
 			limpiarPantalla();
@@ -154,6 +154,9 @@ void juegoAutomatico(int f, int c){
 //		-- Por turnos, cada jugador genera una fila y columna automáticamente (se indica en el archivo). Se comprueba si hay barco indicando agua o tocado (se indica en el archivo).
 //		-- Se comprueba si hay ganador. Si lo hay acaba la partida indicando quíén ha ganado en el archivo
 //		-- EXTRA: comprobar que no se ha repetido ese disparo
+	FILE *parchivo;
+	parchivo=fopen("juego.txt","a");
+
 	int *barcosJ1, *barcosJ2, *disparoJ1, *disparoJ2;
 	barcosJ1 = (int *)malloc(f*c*sizeof(int));
 	barcosJ2 = (int *)malloc(f*c*sizeof(int));
@@ -167,12 +170,82 @@ void juegoAutomatico(int f, int c){
 
 	colocarBarcosAutomaticamente(barcosJ1,f,c);
 	colocarBarcosAutomaticamente(barcosJ2,f,c);
-	imprimirTablero(barcosJ1,f,c);
-	imprimirTablero(barcosJ2,f,c);
+	fprintf(parchivo, "TABLERO DEL JUGADOR 1\n");
+	imprimirTableroArchivo(barcosJ1,f,c,parchivo);
+	fprintf(parchivo, "TABLERO DEL JUGADOR 2\n");
+	imprimirTableroArchivo(barcosJ2,f,c,parchivo);
+
+	printf("test %d \n", compruebaGanador(disparoJ1,f,c));
+		printf("test 1%d \n", compruebaGanador(barcosJ1,f,c));
+			printf("test 2%d \n", compruebaGanador(barcosJ2,f,c));
 
 
+	int frand1,frand2, crand1, crand2, gana1=0, gana2=0;
+	
+	while(gana1==0 && gana2==0){
+		frand1 = rand()%f;
+		crand1 = rand()%c;
+		fprintf(parchivo,"\nDisparo del Jugador 1 a [%d,%d]: ",frand1+1,crand1+1);
+		switch(compruebaDisparo(barcosJ2,f,c,frand1,crand1)){
+			case 0:
+				fprintf(parchivo,"Agua\n");
+				break;
+			case 1:
+				fprintf(parchivo,"Barco de 1 tocado y hundido\n");
+				break;				
+			case 2:
+				fprintf(parchivo,"Barco de 2 tocado\n");
+				break;
+				
+			case 3:
+				fprintf(parchivo,"Barco de 3 tocado\n");
+				break;
+				
+			default:
+				fprintf(parchivo,"Ha seleccionado una posición que ya había sido bombardeada\n");
+				break;
+			}	
+		
+		gana1 = compruebaGanador(barcosJ2,f,c);
+		
+		frand2 = rand()%f;
+		crand2 = rand()%c;
+		fprintf(parchivo,"\nDisparo del Jugador 2 a [%d,%d]: ",frand2+1,crand2+1);
+		switch(compruebaDisparo(barcosJ1,f,c,frand2,crand2)){
+			case 0:
+				fprintf(parchivo,"Agua\n");
+				break;
+			case 1:
+				fprintf(parchivo,"Barco de 1 tocado y hundido\n");
+				break;				
+			case 2:
+				fprintf(parchivo,"Barco de 2 tocado\n");
+				break;
+				
+			case 3:
+				fprintf(parchivo,"Barco de 3 tocado\n");
+				break;
+				
+			default:
+				fprintf(parchivo,"el objetivo ya habia sido impactado antes\n");
+				break;
+			}	
+		
+		gana2 = compruebaGanador(barcosJ1,f,c);
+	}
 
+	if (compruebaGanador(barcosJ2,f,c)==1){
+		fprintf(parchivo,"GANA EL JUGADOR 1\n");
+		fprintf(parchivo,"\n");
+
+	}
+	else{
+		fprintf(parchivo,"GANA EL JUGADOR 2\n");
+		fprintf(parchivo,"\n");
+
+	}
 	return;
+	
 }
 
 
@@ -210,19 +283,39 @@ void imprimirTableroArchivo(int *t, int f, int c, FILE *pa){
 // 	- puntero a archivo
 //OUTPUTs: nada
 //Imprime en el archivo la matriz pasada	
+	fprintf(pa,"\n");
+	for (int i = 0; i < f; i++){
+		for (int j = 0; j < c; j++){
+			fprintf(pa,"\t%d",*(t+i*c+j) );
+		}
+		fprintf(pa,"\n");
+	}
+	fprintf(pa,"\n");
 	
 	return;
 }
 
-int compruebaGanador (int *b, int f, int c){
+int compruebaGanador (int *t, int f, int c){
 //Función compruebaGanador
 //INPUTs:
 //	- puntero a un tablero de barcos
 //	- filas
 //	- columnas
 //OUTPUTS: nada
-//Busca si quedan barcos por hundir. Si no, devuelve 0. 
+//Busca si quedan barcos por hundir. Si  quedan devuelve 0, si no 1. 
+	int vacio = 0;
+		for (int i = 0; i < f*c; i++){
+			if (*(t+i)!=1 && *(t+i)!=2 && *(t+i)!=3 ){
+				vacio++;
+			}
+	}
 	
+	if (vacio == f*c){
+		return 1;
+	}
+	else{
+		return 0;
+	}
 }
 
 int compruebaDisparo(int *t, int f, int c, int posFila, int posCol){
@@ -233,7 +326,28 @@ int compruebaDisparo(int *t, int f, int c, int posFila, int posCol){
 //	- columnas
 //	- tiro (fila y columna)
 //OUTPUTS: 0 si agua, 1 si hay un barco de 1, 2 si hay un barco de 2, 3 si hay un barco de 3
-	return *(t+posFila*c+posCol);
+	switch(*(t+posFila*c+posCol)){
+		case 0:
+			return 0;
+
+		case 1:
+			*(t+posFila*c+posCol) = -1;
+			return 1;
+			break;
+		
+		case 2:
+			*(t+posFila*c+posCol) = -2;
+			return 2;
+			break;
+		
+		case 3:
+			*(t+posFila*c+posCol) = -3;
+			return 3;
+			break;
+		
+		default:
+			return -1;
+	}	
 	
 }
 
