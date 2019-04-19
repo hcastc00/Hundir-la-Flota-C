@@ -17,6 +17,7 @@ int compruebaGanador (int *b, int f, int c);
 int compruebaDisparo(int *t, int f, int c, int posFila, int posCol);
 void juegoManual(int f, int c);
 void juegoAutomatico(int f, int c);
+void salir();
 
 int main(int argc, char *argv[]){
 //Función principal. 
@@ -34,42 +35,13 @@ int main(int argc, char *argv[]){
 
 	int filas = atoi(argv[1]);
 	int columnas = atoi(argv[2]);
-	
-	int *barcosJ1, *barcosJ2, *disparoJ1, *disparoJ2;
-	barcosJ1 = (int *)malloc(filas*columnas*sizeof(int));
-	barcosJ2 = (int *)malloc(filas*columnas*sizeof(int));
-	disparoJ1 = (int *)malloc(filas*columnas*sizeof(int));
-	disparoJ2 = (int *)malloc(filas*columnas*sizeof(int));
 
-	inicializarTablero(barcosJ1,filas,columnas);
-	inicializarTablero(barcosJ2,filas,columnas);
-	inicializarTablero(disparoJ1,filas,columnas);
-	inicializarTablero(disparoJ2,filas,columnas);
-	
 	int seleccion = menu();
-
-	switch(seleccion){
-		case 2:
-			printf("Pc VS PC\n");
-			break;
-		case 3:
-			printf("Hasta la próxima!\n");
-			return 0;
-			break;
-		case 4:
-			limpiarPantalla();
-			colocarBarcosAutomaticamente(barcosJ1, filas, columnas);
-			break;
-		case 5:
-			limpiarPantalla();
-			colocarBarcosManualmente(barcosJ2, filas, columnas);
-			break;
-		case 6:
-			limpiarPantalla();
-			menu();
-			break;
+	while(seleccion!=3){
+		hundirLaFlota(seleccion, filas, columnas);
 	}
-
+	printf("Hasta la próxima!\n");
+	return 0;
 }
 
 void limpiarPantalla(){
@@ -130,6 +102,36 @@ void hundirLaFlota(int opcion, int f,  int c){
 //  - OUTPUTS: nada
 //  - Según la opción leída llama a jugar manual (opción 1), jugar automático (opción 2) o muestra un mensaje de fin (opción 3)
 
+	int *barcosJ1, *barcosJ2, *disparoJ1, *disparoJ2;
+	barcosJ1 = (int *)malloc(f*c*sizeof(int));
+	barcosJ2 = (int *)malloc(f*c*sizeof(int));
+	disparoJ1 = (int *)malloc(f*c*sizeof(int));
+	disparoJ2 = (int *)malloc(f*c*sizeof(int));
+
+	inicializarTablero(barcosJ1,f,c);
+	inicializarTablero(barcosJ2,f,c);
+	inicializarTablero(disparoJ1,f,c);
+	inicializarTablero(disparoJ2,f,c);
+	
+
+
+	switch(opcion){
+		case 2:
+			printf("Pc VS PC\n");
+			break;
+		case 4:
+			limpiarPantalla();
+			juegoAutomatico(f,c);
+			break;
+		case 5:
+			limpiarPantalla();
+			juegoManual(f,c);
+			break;
+		case 6:
+			limpiarPantalla();
+			menu();
+			break;
+	}
 
 }	
 void juegoManual(int f, int c){
@@ -176,6 +178,15 @@ void inicializarTablero(int *t, int f, int c){
 	return;
 }
 
+void imprimirTablero(int *t, int f, int c){
+	for (int i = 0; i < f; i++){
+		for (int j = 0; j < c; j++){
+			printf("\t%d",*(t+i*c+j) );
+		}
+		printf("\n");
+	}
+}
+
 void imprimirTableroArchivo(int *t, int f, int c, FILE *pa){
 //Función imprimirTableroArchivo
 //INPUTS:
@@ -208,6 +219,7 @@ int compruebaDisparo(int *t, int f, int c, int posFila, int posCol){
 //	- columnas
 //	- tiro (fila y columna)
 //OUTPUTS: 0 si agua, 1 si hay un barco de 1, 2 si hay un barco de 2, 3 si hay un barco de 3
+	return *(t+posFila*c+posCol);
 	
 }
 
@@ -278,4 +290,8 @@ void colocarBarcosManualmente(int *t, int f, int c){
 //	- columnas	
 //OUTPUTS: nada
 //Coloca de forma manual 4 barcos de 1 posición, 2 de 2 posiciones y 1 de 3 posiciones en el tablero
+}
+
+void salir(){
+	return;
 }
