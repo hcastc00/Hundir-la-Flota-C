@@ -27,7 +27,10 @@ int main(int argc, char *argv[]){
 //				--- lee las filas y las columnas del tablero
 //				--- mientras la opción leída no sea 3, juega al hundir la flota 
 	
+	srand (time(NULL));
 	limpiarPantalla();
+	
+	//Comprobar arguemntos
 	if (argc<3){
 		printf("No ha introducido correctamente el numero de filas y columnas del tablero.\n");
 		return -1;
@@ -36,10 +39,15 @@ int main(int argc, char *argv[]){
 	int filas = atoi(argv[1]);
 	int columnas = atoi(argv[2]);
 
-	int seleccion = menu();
-	while(seleccion!=3){
-		hundirLaFlota(seleccion, filas, columnas);
+	if (filas<=5 || columnas<=5){
+		printf("El tablero introducido es demasiado pequeño\n Introduzca uno de más de 5x5\n");
+		return -1;
 	}
+
+	int seleccion = menu();
+
+	hundirLaFlota(seleccion,filas,columnas);
+	
 	printf("Hasta la próxima!\n");
 	return 0;
 }
@@ -101,24 +109,12 @@ void hundirLaFlota(int opcion, int f,  int c){
 //	- INPUTS: opción (1, 2 ó 3), filas y columnas del tablero
 //  - OUTPUTS: nada
 //  - Según la opción leída llama a jugar manual (opción 1), jugar automático (opción 2) o muestra un mensaje de fin (opción 3)
-
-	int *barcosJ1, *barcosJ2, *disparoJ1, *disparoJ2;
-	barcosJ1 = (int *)malloc(f*c*sizeof(int));
-	barcosJ2 = (int *)malloc(f*c*sizeof(int));
-	disparoJ1 = (int *)malloc(f*c*sizeof(int));
-	disparoJ2 = (int *)malloc(f*c*sizeof(int));
-
-	inicializarTablero(barcosJ1,f,c);
-	inicializarTablero(barcosJ2,f,c);
-	inicializarTablero(disparoJ1,f,c);
-	inicializarTablero(disparoJ2,f,c);
-	
-
-
 	switch(opcion){
 		case 2:
 			printf("Pc VS PC\n");
 			break;
+		case 3:
+			salir();
 		case 4:
 			limpiarPantalla();
 			juegoAutomatico(f,c);
@@ -147,6 +143,7 @@ void juegoManual(int f, int c){
 
 }
 void juegoAutomatico(int f, int c){
+
 //Función juegoAutomatico
 // 	- INPUTS: número de filas y número de columnas del tablerro
 //	- OUTPUTS: nada
@@ -157,6 +154,22 @@ void juegoAutomatico(int f, int c){
 //		-- Por turnos, cada jugador genera una fila y columna automáticamente (se indica en el archivo). Se comprueba si hay barco indicando agua o tocado (se indica en el archivo).
 //		-- Se comprueba si hay ganador. Si lo hay acaba la partida indicando quíén ha ganado en el archivo
 //		-- EXTRA: comprobar que no se ha repetido ese disparo
+	int *barcosJ1, *barcosJ2, *disparoJ1, *disparoJ2;
+	barcosJ1 = (int *)malloc(f*c*sizeof(int));
+	barcosJ2 = (int *)malloc(f*c*sizeof(int));
+	disparoJ1 = (int *)malloc(f*c*sizeof(int));
+	disparoJ2 = (int *)malloc(f*c*sizeof(int));
+
+	inicializarTablero(barcosJ1,f,c);
+	inicializarTablero(barcosJ2,f,c);
+	inicializarTablero(disparoJ1,f,c);
+	inicializarTablero(disparoJ2,f,c);
+
+	colocarBarcosAutomaticamente(barcosJ1,f,c);
+	colocarBarcosAutomaticamente(barcosJ2,f,c);
+	imprimirTablero(barcosJ1,f,c);
+	imprimirTablero(barcosJ2,f,c);
+
 
 
 	return;
@@ -179,14 +192,15 @@ void inicializarTablero(int *t, int f, int c){
 }
 
 void imprimirTablero(int *t, int f, int c){
+	printf("\n");
 	for (int i = 0; i < f; i++){
 		for (int j = 0; j < c; j++){
 			printf("\t%d",*(t+i*c+j) );
 		}
 		printf("\n");
 	}
+	printf("\n");
 }
-
 void imprimirTableroArchivo(int *t, int f, int c, FILE *pa){
 //Función imprimirTableroArchivo
 //INPUTS:
@@ -241,17 +255,16 @@ int comprobacionEspacioParaBarco(int *t, int f, int c, int iniFila, int iniCol, 
 	if (orientacion == 0){
 
 		for (i = 0; i < tamBarco; i++){
-			if (*(t+(iniFila*c)+iniCol+i)==0){
+			if (*(t+iniFila*c+iniCol+i)==0 && (iniCol+i)<c){
 				hueco++;
 			}
-			printf("%d\n",hueco);
 		}
 	}
 
 	//VERTICAL
 	else if (orientacion==1){
 		for (i = 0; i < tamBarco; i++){
-			if (*(t+(iniFila+i)*c+iniCol)==0){
+			if (*(t+(iniFila+i)*c+iniCol)==0 && (iniFila+i)<f){
 				hueco++;
 			}
 		}
@@ -267,7 +280,7 @@ int comprobacionEspacioParaBarco(int *t, int f, int c, int iniFila, int iniCol, 
 	}
 	else{
 		return 0;
-		}
+	}
 }
 
 void colocarBarcosAutomaticamente(int *t, int f, int c){
@@ -278,7 +291,73 @@ void colocarBarcosAutomaticamente(int *t, int f, int c){
 //	- columnas	
 //OUTPUTS: nada
 //Coloca de forma manual 4 barcos de 1 posición, 2 de 2 posiciones y 1 de 3 posiciones en el tablero
-	
+	//Barcos de 3
+	int fil, col, orientacion,colocados = 0;
+	while(colocados<NUMBARCOS3){
+		fil = rand()%f;
+		col = rand()%c;
+		orientacion = rand()%2;
+		
+		if (comprobacionEspacioParaBarco(t,f,c,fil,col,3,orientacion)==1){
+			colocados++;
+			if (orientacion == 0){
+				for (int j = 0; j < 3; j++){
+					*(t+fil*c+(col+j)) = 3;
+				}
+			}
+			else{
+				for (int j = 0; j < 3; j++){
+					*(t+(fil+j)*c+col) = 3;
+				}
+			}
+			printf("3 Colocado en %d %d\n",fil, col );
+		}
+	}
+
+	//Barcos de 2
+	colocados = 0;
+	while(colocados<NUMBARCOS2){
+		fil = rand()%f;
+		col = rand()%c;
+		orientacion = rand()%2;
+		
+		if (comprobacionEspacioParaBarco(t,f,c,fil,col,2,orientacion)==1){
+			colocados++;
+			if (orientacion == 0){
+				for (int j = 0; j < 2; j++){
+					*(t+fil*c+(col+j)) = 2;
+				}
+			}
+			else{
+				for (int j = 0; j < 2; j++){
+					*(t+(fil+j)*c+col) = 2;
+				}
+			}
+		printf(" 2 Colocado en %d %d\n",fil, col );
+		}
+	}
+	//Barcos de 1
+	colocados = 0;
+	while (colocados<NUMBARCOS1){
+		fil = rand()%f;
+		col = rand()%c;
+		orientacion = rand()%2;
+		
+		if (comprobacionEspacioParaBarco(t,f,c,fil,col,1,orientacion)==1){
+			colocados++;
+			if (orientacion == 0){
+				for (int j = 0; j < 1; j++){
+					*(t+fil*c+(col+j)) = 1;
+				}
+			}
+			else{
+				for (int j = 0; j < 1; j++){
+					*(t+(fil+j)*c+col) = 1;
+				}
+			}
+			printf("Colocado en %d %d\n",fil, col );
+		}
+	}
 }
 
 
@@ -290,6 +369,8 @@ void colocarBarcosManualmente(int *t, int f, int c){
 //	- columnas	
 //OUTPUTS: nada
 //Coloca de forma manual 4 barcos de 1 posición, 2 de 2 posiciones y 1 de 3 posiciones en el tablero
+	
+
 }
 
 void salir(){
