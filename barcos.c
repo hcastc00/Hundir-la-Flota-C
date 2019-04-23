@@ -1,3 +1,9 @@
+/*
+*	HUNDIR LA FLOTA
+*	Práctica Estructura de Computadores 1ºIngeniria Informátoca
+*	Héctor Castro Casado
+*/
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
@@ -253,9 +259,10 @@ void juegoManual(int f, int c){
 	else{
 		printf("\nGANA EL BOT\n");
 	}
-	//TODO free a los punteros
 
-
+	free(barcosJ1);
+	free(barcosBOT);
+	free(disparoJ1);
 }
 void juegoAutomatico(int f, int c){
 
@@ -272,7 +279,7 @@ void juegoAutomatico(int f, int c){
 	FILE *parchivo;
 	parchivo=fopen("juego.txt","a");
 
-	int *barcosJ1, *barcosJ2, *disparoJ1, *disparoJ2;
+	int *barcosJ1, *barcosJ2, *disparoJ1;
 	barcosJ1 = (int *)malloc(f*c*sizeof(int));
 	barcosJ2 = (int *)malloc(f*c*sizeof(int));
 
@@ -285,12 +292,7 @@ void juegoAutomatico(int f, int c){
 	imprimirTableroArchivo(barcosJ1,f,c,parchivo);
 	fprintf(parchivo, "TABLERO DEL JUGADOR 2\n");
 	imprimirTableroArchivo(barcosJ2,f,c,parchivo);
-
-	printf("test %d \n", compruebaGanador(disparoJ1,f,c));
-		printf("test 1%d \n", compruebaGanador(barcosJ1,f,c));
-			printf("test 2%d \n", compruebaGanador(barcosJ2,f,c));
-
-
+	
 	int frand1,frand2, crand1, crand2, gana1=0, gana2=0;
 	
 	while(gana1==0 && gana2==0){
@@ -353,8 +355,9 @@ void juegoAutomatico(int f, int c){
 		}
 	}
 	
-	//TODO HACER FREE, CERRAR ARCHIVO
-	
+	fclose(parchivo);
+	free(barcosJ1);
+	free(barcosJ2);
 
 	/*
 	if (compruebaGanador(barcosJ2,f,c)==1){
